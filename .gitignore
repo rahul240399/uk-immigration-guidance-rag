@@ -1,0 +1,11 @@
+**/__pycache__/
+
+data/
+*.jsonl
+*.pdf
+.env
+.DS_Store
+config/paths.yaml
+__pycache__/
+*.pyc
+raw_documents/

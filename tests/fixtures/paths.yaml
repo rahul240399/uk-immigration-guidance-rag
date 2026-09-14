@@ -1,0 +1,4 @@
+# Test configuration
+raw_rules: tests/fixtures
+interim: /tmp/test-interim
+processed: /tmp/test-processed

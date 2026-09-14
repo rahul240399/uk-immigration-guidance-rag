@@ -1,1 +1,26 @@
+# Core HTTP and web scraping
 requests>=2.31.0
+beautifulsoup4>=4.12.2
+lxml>=4.9.3
+
+# PDF processing
+PyPDF2>=3.0.1
+pypdf>=4.0.0
+
+# Data processing and validation  
+pydantic>=2.0.0
+python-dateutil>=2.8.2
+
+# Testing frameworks
+pytest>=7.4.0
+hypothesis>=6.82.0
+pytest-cov>=4.1.0
+
+# Logging and configuration
+pyyaml>=6.0
+python-dotenv>=1.0.0
+
+# Development tools
+black>=23.7.0
+flake8>=6.0.0
+mypy>=1.5.0

@@ -1,0 +1,241 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Set up project structure and dependencies": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789296775797
+      },
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789296783983
+      },
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789297479985
+      }
+    ],
+    "1.2 Create core data models and interfaces": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789296775827
+      },
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789297488387
+      },
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789298179778
+      }
+    ],
+    "2.1 Implement GOV.UK Content API client": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789296775897
+      },
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789297492411
+      },
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789298183558
+      }
+    ],
+    "2.2 Add retry logic with exponential backoff": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789296775917
+      },
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789298192680
+      }
+    ],
+    "3.1 Implement Content Router": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789296775935
+      },
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789298196983
+      },
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789298375366
+      }
+    ],
+    "3.2 Implement Immigration Rules Processor": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789296775958
+      },
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789298398552
+      },
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789299088455
+      }
+    ],
+    "3.3 Implement Caseworker Guidance Processor": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789296775974
+      },
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789298402715
+      },
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789299092509
+      }
+    ],
+    "4. Checkpoint - Core Processing Components": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789296775993
+      }
+    ],
+    "5.1 Implement Relationship Mapper": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789296776009
+      }
+    ],
+    "6.1 Implement OGL v3.0 Compliance Handler": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789296776026
+      }
+    ],
+    "6.2 Implement Quality Validator": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789296776043
+      }
+    ],
+    "7.1 Implement Metadata Enricher": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789296776099
+      }
+    ],
+    "7.2 Implement JSON Output Writer": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789296776117
+      },
+      {
+        "executionId": "88aa101c-91f6-4009-9edb-26eb56325ee1",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789299565241
+      }
+    ],
+    "8.1 Implement main pipeline orchestrator": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789296776136
+      },
+      {
+        "executionId": "88aa101c-91f6-4009-9edb-26eb56325ee1",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789299569444
+      }
+    ],
+    "8.2 Add comprehensive error handling and reporting": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789296776151
+      }
+    ],
+    "9. Checkpoint - Pipeline Integration": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789296776168
+      }
+    ],
+    "10.1 Create configuration management system": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789296776185
+      }
+    ],
+    "10.2 Add command-line interface and main entry point": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789296776201
+      }
+    ],
+    "11.1 Implement performance monitoring and optimization": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789296776218
+      }
+    ],
+    "12. Final Checkpoint - Complete System": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789296776234
+      }
+    ],
+    "1. Project Setup and Core Infrastructure": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789298179808
+      }
+    ],
+    "2. API Client and Rate Limiting": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789298192808
+      }
+    ],
+    "3. Content Processing Components": [
+      {
+        "executionId": "82128b2a-07de-4720-ad1c-0e29ae332e36",
+        "chatSessionId": "sess_4d46a585-367f-40fe-b37f-e3b5b4e0543a",
+        "timestamp": 1789299092543
+      }
+    ]
+  }
+}
