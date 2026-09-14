@@ -1,36 +1,29 @@
 """
-Immigration Rules Raw Data Extractor
-------------------------------------
-Fetches each immigration rules endpoint from GOV.UK Content API and saves
-the complete API response unchanged as <slug>.json files.
+Fetch raw immigration rules from GOV.UK Content API.
 
-Output:
-- raw_rules/<slug>.json: Complete API response for each endpoint
-- fetch-log.csv: Request log with timestamps, status, metadata
-- manifest.json: Snapshot metadata with file hashes and completeness info
+Reads a plan CSV (base_path, title) produced by ``discover_rules``,
+fetches each section's full API response unchanged, and writes
+``fetch-log.csv`` and ``manifest.json`` alongside the saved files.
+
+Usage::
+
+    python -m code.fetch.fetch_rules \\
+        --plan manifests/2026-09-14_corpus_rules-fetch-plan.csv \\
+        --out  data/raw-rules
 
 Licence: Contains public sector information licensed under the
          Open Government Licence v3.0.
-         https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
 """
 
+import argparse
 import csv
 import hashlib
 import json
 import logging
-import time
-import yaml
 from datetime import datetime, timezone
 from pathlib import Path
 
-import requests
-
-# ── configuration ──────────────────────────────────────────────────────────────
-BASE_API       = "https://www.gov.uk/api/content"
-RATE_LIMIT     = 0.5          # seconds between requests (2 req/sec)
-RETRY_WAITS    = [2, 5, 10]   # back-off schedule (seconds)
-ENDPOINTS_FILE = "discovered_endpoints.json"
-USER_AGENT     = "WarwickMScDissertation/1.0 (u5757819@live.warwick.ac.uk)"
+from code.fetch.http_client import get_json
 
 logging.basicConfig(
     level=logging.INFO,
@@ -40,190 +33,90 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 
-def load_output_path(config_path: str = "config/paths.yaml") -> Path:
-    """Load output path from config."""
-    config_file = Path(config_path)
-    if not config_file.exists():
-        raise FileNotFoundError(f"Configuration file not found: {config_file}")
-    
-    with open(config_file) as f:
-        config = yaml.safe_load(f)
-    
-    return Path(config["raw_rules"])
-
-
 def slug_from_path(api_path: str) -> str:
-    """Turn /guidance/immigration-rules/foo-bar → foo-bar"""
+    """``/guidance/immigration-rules/foo-bar`` → ``foo-bar``"""
     return api_path.rstrip("/").split("/")[-1] or "index"
 
 
-def fetch_with_retry(session: requests.Session, api_path: str) -> tuple[dict | None, int, int]:
-    """Fetch one endpoint with retries. Returns (parsed_json, status_code, response_bytes)."""
-    url = BASE_API + api_path
-    for attempt, wait in enumerate([0] + RETRY_WAITS, start=1):
-        if wait:
-            time.sleep(wait)
-        try:
-            r = session.get(url, timeout=20)
-            response_bytes = len(r.content)
-            
-            if r.status_code == 200:
-                return r.json(), r.status_code, response_bytes
-            if r.status_code == 404:
-                log.warning("404 %s – skipping", api_path)
-                return None, r.status_code, response_bytes
-            log.warning("HTTP %s on attempt %d for %s", r.status_code, attempt, api_path)
-            
-        except requests.RequestException as exc:
-            log.warning("Request error attempt %d for %s: %s", attempt, api_path, exc)
-    
-    log.error("All retries exhausted for %s", api_path)
-    return None, 0, 0
+def load_plan(plan_path: Path) -> list[dict]:
+    """Read the fetch-plan CSV into a list of {base_path, title} dicts."""
+    with open(plan_path, newline="", encoding="utf-8") as f:
+        return list(csv.DictReader(f))
 
 
-def calculate_sha256(data: dict) -> str:
-    """Calculate SHA256 hash of JSON response"""
-    json_str = json.dumps(data, sort_keys=True, ensure_ascii=False)
-    return hashlib.sha256(json_str.encode('utf-8')).hexdigest()
-
-
-def main():
-    import argparse
-    ap = argparse.ArgumentParser(description="Fetch raw immigration rules from GOV.UK API")
-    ap.add_argument("--config", default="config/paths.yaml", help="Path to paths.yaml")
+def main() -> None:
+    ap = argparse.ArgumentParser(description="Fetch raw immigration rules sections")
+    ap.add_argument("--plan", required=True,
+                    help="Path to the rules-fetch-plan CSV")
+    ap.add_argument("--out", required=True,
+                    help="Output directory for raw JSON files")
     args = ap.parse_args()
 
-    # Load configuration
-    output_dir = load_output_path(args.config)
-    output_dir.mkdir(parents=True, exist_ok=True)
-    
-    # Load endpoints
-    endpoints_path = Path(ENDPOINTS_FILE)
-    if not endpoints_path.exists():
-        log.error("Endpoints file not found: %s", ENDPOINTS_FILE)
-        return
+    plan = load_plan(Path(args.plan))
+    out_dir = Path(args.out)
+    out_dir.mkdir(parents=True, exist_ok=True)
 
-    with endpoints_path.open() as f:
-        endpoints = json.load(f)
+    total = len(plan)
+    log.info("Fetching %d sections → %s", total, out_dir)
 
-    immigration_rules = endpoints.get("immigration_rules", [])
-    total = len(immigration_rules)
-    
-    log.info("Starting extraction of %d immigration rules documents", total)
-    log.info("Output directory: %s", output_dir)
+    # Fetch log — one row per HTTP attempt
+    fetch_log_path = out_dir / "fetch-log.csv"
+    fetch_log_fh = open(fetch_log_path, "w", newline="", encoding="utf-8")
+    log_fields = ["timestamp", "url", "status", "bytes",
+                  "content_id", "public_updated_at", "sha256"]
+    log_writer = csv.DictWriter(fetch_log_fh, fieldnames=log_fields)
+    log_writer.writeheader()
 
-    # Setup session
-    session = requests.Session()
-    session.headers.update({
-        "User-Agent": USER_AGENT,
-        "Accept": "application/json",
-    })
-
-    # Initialize tracking
-    fetch_log_path = output_dir / "fetch-log.csv"
-    manifest_path = output_dir / "manifest.json"
-    
-    fetch_log = []
-    file_hashes = {}
-    fetched_count = 0
-    missing_list = []
-    last_request = 0.0
-    
-    snapshot_date = datetime.now(timezone.utc).isoformat()
-
-    # Process each endpoint
-    for i, api_path in enumerate(immigration_rules, 1):
-        # Rate limiting
-        elapsed = time.time() - last_request
-        if elapsed < RATE_LIMIT:
-            time.sleep(RATE_LIMIT - elapsed)
-        last_request = time.time()
-
-        # Fetch data
-        request_time = datetime.now(timezone.utc)
-        data, status_code, response_bytes = fetch_with_retry(session, api_path)
-        
-        url = BASE_API + api_path
-        content_id = data.get("content_id", "") if data else ""
-        public_updated_at = data.get("public_updated_at", "") if data else ""
-        
-        # Calculate hash and log request
-        if data:
-            response_hash = calculate_sha256(data)
-            slug = slug_from_path(api_path)
-            
-            # Save complete API response
-            output_file = output_dir / f"{slug}.json"
-            output_file.write_text(
-                json.dumps(data, ensure_ascii=False, indent=2),
-                encoding="utf-8"
-            )
-            
-            file_hashes[f"{slug}.json"] = response_hash
-            fetched_count += 1
-        else:
-            response_hash = ""
-            missing_list.append(api_path)
-
-        # Log the request
-        fetch_log.append({
-            "timestamp": request_time.isoformat(),
-            "url": url,
-            "status": status_code,
-            "bytes": response_bytes,
-            "content_id": content_id,
-            "public_updated_at": public_updated_at,
-            "sha256": response_hash
+    def write_log_row(ts, url, status, nbytes, cid, pub, sha):
+        log_writer.writerow({
+            "timestamp": ts, "url": url, "status": status,
+            "bytes": nbytes, "content_id": cid,
+            "public_updated_at": pub, "sha256": sha,
         })
 
+    snapshot_date = datetime.now(timezone.utc).isoformat()
+    file_hashes: dict[str, str] = {}
+    missing: list[str] = []
+    fetched = 0
+
+    for i, row in enumerate(plan, 1):
+        bp = row["base_path"]
+        data = get_json(bp, log_writer=write_log_row)
+
+        if data is None:
+            missing.append(bp)
+        else:
+            slug = slug_from_path(bp)
+            dest = out_dir / f"{slug}.json"
+            body = json.dumps(data, ensure_ascii=False, indent=2)
+            dest.write_text(body, encoding="utf-8")
+            sha = hashlib.sha256(
+                json.dumps(data, sort_keys=True, ensure_ascii=False).encode()
+            ).hexdigest()
+            file_hashes[f"{slug}.json"] = sha
+            fetched += 1
+
         if i % 10 == 0 or i == total:
-            log.info("%d/%d done (fetched=%d)", i, total, fetched_count)
+            log.info("%d/%d done (fetched=%d)", i, total, fetched)
 
-    # Write fetch log
-    with open(fetch_log_path, 'w', newline='', encoding='utf-8') as f:
-        if fetch_log:
-            writer = csv.DictWriter(f, fieldnames=fetch_log[0].keys())
-            writer.writeheader()
-            writer.writerows(fetch_log)
+    fetch_log_fh.close()
 
-    # Write manifest
+    # Manifest
     manifest = {
         "snapshot_date": snapshot_date,
         "licence": "OGL-3.0",
         "licence_url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
         "sections_planned": total,
-        "sections_fetched": fetched_count,
+        "sections_fetched": fetched,
         "file_hashes": file_hashes,
-        "missing_list": missing_list,
-        "user_agent": USER_AGENT,
-        "source_endpoints_file": str(endpoints_path.resolve())
+        "missing_list": missing,
     }
-    
+    manifest_path = out_dir / "manifest.json"
     manifest_path.write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=2),
-        encoding="utf-8"
-    )
+        json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    log.info("Extraction complete:")
-    log.info("  Files saved: %d/%d", fetched_count, total)
-    log.info("  Missing: %d", len(missing_list))
-    log.info("  Fetch log: %s", fetch_log_path)
-    log.info("  Manifest: %s", manifest_path)
-    
-    # Verify all files have details.body key
-    files_with_body = 0
-    for file_path in output_dir.glob("*.json"):
-        if file_path.name in ['manifest.json', 'fetch-log.csv']:
-            continue
-        try:
-            with open(file_path) as f:
-                data = json.load(f)
-                if "details" in data and "body" in data["details"]:
-                    files_with_body += 1
-        except Exception as e:
-            log.warning("Error checking %s: %s", file_path, e)
-    
-    log.info("  Files with details.body: %d/%d", files_with_body, fetched_count)
+    log.info("Done: %d/%d fetched, %d missing", fetched, total, len(missing))
+    log.info("Log: %s  Manifest: %s", fetch_log_path, manifest_path)
 
 
 if __name__ == "__main__":

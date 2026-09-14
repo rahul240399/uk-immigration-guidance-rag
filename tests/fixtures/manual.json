@@ -1,0 +1,32 @@
+{
+  "base_path": "/guidance/immigration-rules",
+  "title": "Immigration Rules",
+  "content_id": "deadbeef-0000-0000-0000-000000000000",
+  "public_updated_at": "2025-12-30T08:09:17+00:00",
+  "details": {
+    "child_section_groups": [
+      {
+        "title": "Parts",
+        "child_sections": [
+          {
+            "base_path": "/guidance/immigration-rules/immigration-rules-part-1-leave-to-enter-or-stay-in-the-uk",
+            "title": "Part 1: leave to enter or stay in the UK"
+          },
+          {
+            "base_path": "/guidance/immigration-rules/immigration-rules-part-2-transitional-provisions",
+            "title": "Part 2: transitional provisions"
+          }
+        ]
+      },
+      {
+        "title": "Appendices",
+        "child_sections": [
+          {
+            "base_path": "/guidance/immigration-rules/immigration-rules-appendix-a-attributes",
+            "title": "Appendix A: attributes"
+          }
+        ]
+      }
+    ]
+  }
+}

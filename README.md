@@ -26,6 +26,27 @@ affect answer accuracy and faithfulness when a RAG system is used over the UK Im
 Data files are not stored in this repository. Raw snapshots and processed datasets live on
 Warwick OneDrive; `manifests/` holds the file lists and checksums that identify each snapshot.
 
+## Running
+
+```bash
+# 1. Discover immigration rules sections (writes a fetch-plan CSV)
+python -m code.fetch.discover_rules --out manifests/
+
+# 2. Fetch raw sections using the plan
+python -m code.fetch.fetch_rules \
+    --plan manifests/<date>_corpus_rules-fetch-plan.csv \
+    --out  data/raw-rules
+
+# 3. Parse to structured records
+python -m code.parse.parse_rules --config config/paths.yaml
+
+# 4. Validate and freeze
+python -m code.validate.freeze_rules data/interim/<stamp>_rules-parse
+
+# Run tests
+pytest -q -p no:debugging -p no:faulthandler
+```
+
 ## Ethics
 
 WMG Student Ethics Form v3, approved 11 September 2026. No human participants, no personal data.
