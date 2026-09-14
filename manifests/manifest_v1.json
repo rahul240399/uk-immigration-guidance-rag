@@ -1,7 +1,7 @@
 {
-  "snapshot_date": "2026-09-14T08:46:29.193222+00:00",
-  "raw_manifest_sha256": "014629a79a839c6805da868aef3ee6bf76eff904683765c6e0a33f281ff260d9",
-  "parser_version": "1501cde8cd91de5e331043d5ce2fd74b426cd7af",
+  "snapshot_date": "2026-09-14T12:53:07.923762+00:00",
+  "raw_manifest_sha256": "6f2fc8ddbfc49269128e06e41faa28edb52de87d9feac828c7c2897796b24ab2",
+  "parser_version": "45e027f073d175e734e07f5863c3b082053dbc14",
   "record_counts": {
     "total": 15822,
     "by_type": {
@@ -127,8 +127,8 @@
     "text_check": true,
     "containment_check": true
   },
-  "run_folder_used": "data/interim/2026-09-14_1206_rules-parse",
-  "date_frozen": "2026-09-14T11:06:39.903604+00:00",
+  "run_folder_used": "data/interim/2026-09-14_1354_rules-parse",
+  "date_frozen": "2026-09-14T12:55:17.213890+00:00",
   "sections_count": 101,
   "total_records": 15822
 }

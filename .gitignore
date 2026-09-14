@@ -9,3 +9,4 @@ config/paths.yaml
 __pycache__/
 *.pyc
 raw_documents/
+manifests/*-fetch-plan.csv
