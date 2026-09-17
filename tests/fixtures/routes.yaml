@@ -1,0 +1,17 @@
+routes:
+  skilled_worker:
+    guidance:
+      - /government/publications/skilled-worker-guidance
+      - /government/publications/shared-guidance
+  student:
+    guidance:
+      - /government/publications/student-guidance
+      - /government/publications/shared-guidance
+
+cross_cutting:
+  guidance:
+    - /government/publications/cross-cutting-one
+
+optional:
+  guidance:
+    - /government/publications/optional-one

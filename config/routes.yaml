@@ -1,0 +1,102 @@
+# config/routes.yaml
+# Bounded scope for the caseworker guidance corpus, derived from the discovery plan of 14 Sept 2026.
+# Explicit base paths, not keywords: every document below was selected by title from the plan and
+# is to be confirmed by the student on the GOV.UK sub-collection pages (scope check, step 3 of verify).
+# Excluded by design: Immigration Rules archive PDFs (~230), application forms (~50), asylum and
+# protection (~90), asylum support, enforcement and criminal investigation (~60), nationality (~40),
+# EEA/EUSS, HM Forces, ETA, Windrush, Ukraine schemes, appeals, sponsor-licensing operations.
+ 
+routes:
+  skilled_worker:
+    rules_sections:
+      - /guidance/immigration-rules/immigration-rules-appendix-skilled-worker
+      - /guidance/immigration-rules/immigration-rules-appendix-skilled-occupations
+      - /guidance/immigration-rules/immigration-rules-appendix-immigration-salary-list
+    guidance:
+      - /government/publications/skilled-worker-visa-caseworker-guidance
+      - /government/publications/dependent-family-members-in-work-routes-immigration-staff-guidance
+ 
+  student:
+    rules_sections:
+      - /guidance/immigration-rules/immigration-rules-appendix-student
+      - /guidance/immigration-rules/immigration-rules-appendix-child-student
+    guidance:
+      - /government/publications/student-route-caseworker-guidance
+      - /government/publications/short-term-students          # Appendix Short-term Student; student-adjacent
+ 
+  graduate:
+    rules_sections:
+      - /guidance/immigration-rules/immigration-rules-appendix-graduate
+    guidance: []   # No Graduate caseworker guidance is listed in the collection (checked 14 Sept 2026).
+                   # Graduate questions are answered from the Rules only; state this in Chapter 3.
+ 
+  visitor:
+    rules_sections:
+      - /guidance/immigration-rules/immigration-rules-appendix-v-visitor
+      - /guidance/immigration-rules/immigration-rules-appendix-visitor-permitted-activities
+      - /guidance/immigration-rules/immigration-rules-appendix-visitor-visa-national-list
+      - /guidance/immigration-rules/immigration-rules-appendix-visitor-permit-free-festival-list
+    guidance:
+      - /government/publications/visit-guidance
+      - /government/publications/considering-human-rights-claims-in-visit-applications
+      - /government/publications/transit-guidance
+ 
+  family:
+    rules_sections:
+      - /guidance/immigration-rules/immigration-rules-appendix-fm-family-members
+      - /guidance/immigration-rules/immigration-rules-appendix-fm-se-family-members-specified-evidence
+      - /guidance/immigration-rules/immigration-rules-appendix-relationship-with-partner
+      - /guidance/immigration-rules/immigration-rules-appendix-children
+      - /guidance/immigration-rules/immigration-rules-appendix-settlement-family-life
+      - /guidance/immigration-rules/immigration-rules-part-8-family-members
+    guidance:
+      - /government/publications/family-members-under-part-8-and-appendix-fm-of-the-immigration-rules
+      - /government/publications/chapter-8-appendix-fm-family-members
+      - /government/publications/family-life-as-a-partner-or-parent-private-life-and-exceptional-circumstance
+      - /government/publications/relationship-with-a-partner-caseworker-guidance
+      - /government/publications/partners-divorce-and-dissolution
+      - /government/publications/appendix-children-caseworker-guidance
+      - /government/publications/adopted-children
+      - /government/publications/family-migration-adequate-maintenance-and-accommodation
+      - /government/publications/maintenance-and-accommodation-maa
+      - /government/publications/english-language-requirement-family-members
+      - /government/publications/settlement-family-and-private-life-caseworker-guidance
+ 
+cross_cutting:
+  rules_sections:
+    - /guidance/immigration-rules/immigration-rules-appendix-english-language
+    - /guidance/immigration-rules/immigration-rules-appendix-finance
+    - /guidance/immigration-rules/immigration-rules-appendix-continuous-residence
+    - /guidance/immigration-rules/immigration-rules-appendix-koll
+    - /guidance/immigration-rules/immigration-rules-part-suitability
+    - /guidance/immigration-rules/immigration-rules-part-9-grounds-for-refusal
+    - /guidance/immigration-rules/immigration-rules-part-1-leave-to-enter-or-stay-in-the-uk
+  guidance:
+    - /government/publications/english-language-requirements-for-immigration-applicants
+    - /government/publications/financial-requirement-caseworker-guidance
+    - /government/publications/continuous-residence-caseworker-guidance
+    - /government/publications/indefinite-leave-to-remain-calculating-continuous-period-in-uk
+    - /government/publications/knowledge-of-life-and-language-in-the-uk
+    - /government/publications/grounds-for-refusal-criminality
+    - /government/publications/suitability-false-representations-immigration-staff-guidance
+    - /government/publications/suitability-previous-breach-of-uk-immigration-laws-immigration-staff-guidance
+    - /government/publications/suitability-non-conducive-grounds-for-refusal-or-cancellation-of-entry-clearance-or-permission
+    - /government/publications/applications-from-overstayers-non-family-routes
+    - /government/publications/specified-application-forms-and-procedures
+    - /government/publications/immigration-health-surcharge-caseworker-guidance
+    - /government/publications/public-funds
+    - /government/publications/points-based-system-evidential-flexibility
+    - /government/publications/varying-a-settlement-application-and-granting-permission-to-stay
+ 
+# Optional, second tier: include only if the first tier parses cleanly by day 8.
+optional:
+  guidance:
+    - /government/publications/private-life-caseworker-guidance
+    - /government/publications/victims-of-domestic-violence
+    - /government/publications/administrative-review-caseworker-guidance
+    - /government/publications/long-residence
+    - /government/publications/applications-for-a-fee-waiver-and-refunds
+    - /government/publications/what-is-entry-clearance-ecb03
+    - /government/publications/where-to-apply-ecb05
+    - /government/publications/visa-endorsements-and-conditions-ecb13
+    - /government/publications/extant-leave-ecb22
