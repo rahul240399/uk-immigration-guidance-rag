@@ -50,5 +50,4 @@ pytest -q -p no:debugging -p no:faulthandler
 ## Ethics
 
 WMG Student Ethics Form v3, approved 11 September 2026. No human participants, no personal data.
-Data is shared only within the research team. See `.kiro/steering/data-compliance.md` for the
-rules the code follows.
+Data is shared only within the research team.
