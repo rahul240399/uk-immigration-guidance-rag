@@ -1,0 +1,30 @@
+seed: 20260918
+
+corpus: rules-paragraphs_v1.jsonl
+links: rules-crossrefs_v2.csv
+exclude_text_types: [deleted, list_item, table_row]
+exclude_confidence: [low]
+min_words: 15
+
+tiers:
+  T1: one paragraph
+  T2: a rule plus its attached subparagraphs, 2 to 6 records, one section
+  T3: a paragraph plus the target of one of its resolved paragraph-level links, target in another section
+
+counts:
+  skilled_worker: {T1: 8, T2: 7, T3: 5}
+  student:        {T1: 8, T2: 7, T3: 5}
+  graduate:       {T1: 8, T2: 6, T3: 6}
+  visitor:        {T1: 8, T2: 7, T3: 5}
+  family:         {T1: 8, T2: 7, T3: 5}
+
+llm:
+  provider: ollama
+  model: gemma4:12b
+  digest: 4eb23ef187e2
+  options: {temperature: 0, seed: 20260918, num_ctx: 8192, num_predict: 512}
+  think: false
+
+embeddings:
+  provider: sentence-transformers
+  model: "BAAI/bge-base-en-v1.5"
