@@ -1,0 +1,15 @@
+# Copy to config/paths.yaml and adjust paths for your machine.
+# Every key is required by load_paths().
+
+raw_rules: ./data/raw-rules
+raw_guidance: ./data/raw-guidance
+interim: ./data/interim
+processed: ./data/processed
+runs: ./data/runs
+index: ./data/index
+evalset: ./data/evalset
+results: ./data/results
+logs: ./data/logs
+manifests:
+  rules: ./data/processed/manifest_v1.json
+  guidance: ./data/processed/guidance-manifest_v1.json

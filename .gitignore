@@ -6,7 +6,12 @@ data/
 .env
 .DS_Store
 config/paths.yaml
+config/onedrive.yaml
 __pycache__/
 *.pyc
 raw_documents/
 manifests/*-fetch-plan.csv
+runs/
+index/
+evalset/
+results/
