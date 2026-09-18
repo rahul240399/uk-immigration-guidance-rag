@@ -91,10 +91,22 @@ def build_name_index(records):
 
 def load_section_aliases():
     alias_path = Path("config/section_aliases.yaml")
-    if alias_path.exists():
-        with open(alias_path) as f:
-            return yaml.safe_load(f) or {}
-    return {}
+    if not alias_path.exists():
+        return {}
+    with open(alias_path) as f:
+        raw = yaml.safe_load(f) or {}
+    # Flatten the structured format into a single {name -> path_or_absent} map
+    flat = {}
+    for name, path in (raw.get("appendix") or {}).items():
+        flat[name] = path
+    for name, path in (raw.get("part") or {}).items():
+        flat[name] = path
+    absent = raw.get("absent") or {}
+    for name in (absent.get("appendix") or []):
+        flat[name] = "absent"
+    for name in (absent.get("part") or []):
+        flat[name] = "absent"
+    return flat
 
 
 

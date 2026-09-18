@@ -1,26 +1,42 @@
-# Section name aliases for cross-reference resolution
-# Map normalized reference names to section base paths
+# Section name aliases for cross-reference resolution.
+# Keys are the output of strip_trailing_connectors then normalize_name.
+# Three blocks: appendix (name -> section path), part (name -> section path),
+# absent (names that intentionally resolve nowhere).
 
-"continuous residence": "/guidance/immigration-rules/immigration-rules-appendix-continuous-residence"
-"koll": "/guidance/immigration-rules/immigration-rules-appendix-koll"
-"english language": "/guidance/immigration-rules/immigration-rules-appendix-english-language"
-"suitability": "/guidance/immigration-rules/immigration-rules-part-suitability"
-"part suitability": "/guidance/immigration-rules/immigration-rules-part-suitability"
-"ar": "/guidance/immigration-rules/immigration-rules-appendix-administrative-review"
-"administrative review": "/guidance/immigration-rules/immigration-rules-appendix-administrative-review"
-"w": "absent"
-"f": "absent"
-"tuberculosis": "/guidance/immigration-rules/immigration-rules-appendix-tuberculosis-tb"
-"8": "absent"
-"fm": "/guidance/immigration-rules/immigration-rules-appendix-fm-family-members"
-"family members": "/guidance/immigration-rules/immigration-rules-appendix-fm-family-members"
-"eu": "/guidance/immigration-rules/immigration-rules-appendix-eu"
-"w worker": "absent"
-"a": "/guidance/immigration-rules/immigration-rules-appendix-a-attributes"
-"attributes": "/guidance/immigration-rules/immigration-rules-appendix-a-attributes"
-"v": "/guidance/immigration-rules/immigration-rules-appendix-v-visitor"
-"visitor": "/guidance/immigration-rules/immigration-rules-appendix-v-visitor"
-"5": "absent"
-"armed forces": "/guidance/immigration-rules/immigration-rules-appendix-hm-armed-forces"
-"11": "absent"
-"service providers": "absent"
+appendix:
+  "continuous residence": "/guidance/immigration-rules/immigration-rules-appendix-continuous-residence"
+  "koll": "/guidance/immigration-rules/immigration-rules-appendix-koll"
+  "english language": "/guidance/immigration-rules/immigration-rules-appendix-english-language"
+  "ar": "/guidance/immigration-rules/immigration-rules-appendix-administrative-review"
+  "administrative review": "/guidance/immigration-rules/immigration-rules-appendix-administrative-review"
+  "tuberculosis": "/guidance/immigration-rules/immigration-rules-appendix-tuberculosis-tb"
+  "fm": "/guidance/immigration-rules/immigration-rules-appendix-fm-family-members"
+  "family members": "/guidance/immigration-rules/immigration-rules-appendix-fm-family-members"
+  "eu": "/guidance/immigration-rules/immigration-rules-appendix-eu"
+  "a": "/guidance/immigration-rules/immigration-rules-appendix-a-attributes"
+  "attributes": "/guidance/immigration-rules/immigration-rules-appendix-a-attributes"
+  "v": "/guidance/immigration-rules/immigration-rules-appendix-v-visitor"
+  "visitor": "/guidance/immigration-rules/immigration-rules-appendix-v-visitor"
+  "armed forces": "/guidance/immigration-rules/immigration-rules-appendix-hm-armed-forces"
+
+part:
+  "1": "/guidance/immigration-rules/immigration-rules-part-1-leave-to-enter-or-stay-in-the-uk"
+  "2": "/guidance/immigration-rules/immigration-rules-part-2-transitional-provisions"
+  "3": "/guidance/immigration-rules/immigration-rules-part-3-students"
+  "4": "/guidance/immigration-rules/immigration-rules-part-4-work-experience"
+  "5": "/guidance/immigration-rules/immigration-rules-part-5-working-in-the-uk"
+  "6": "/guidance/immigration-rules/immigration-rules-part-6-self-employment-and-business-people"
+  "6a": "/guidance/immigration-rules/immigration-rules-part-6a-the-points-based-system"
+  "7": "/guidance/immigration-rules/immigration-rules-part-7-other-categories"
+  "8": "/guidance/immigration-rules/immigration-rules-part-8-family-members"
+  "11": "/guidance/immigration-rules/immigration-rules-part-11-asylum"
+  "11a": "/guidance/immigration-rules/immigration-rules-part-11a-temporary-protection"
+  "11b": "/guidance/immigration-rules/immigration-rules-part-11b"
+  "12": "/guidance/immigration-rules/immigration-rules-part-12-procedure-and-rights-of-appeal"
+  "13": "/guidance/immigration-rules/immigration-rules-part-13-deportation"
+  "14": "/guidance/immigration-rules/immigration-rules-part-14-stateless-persons"
+  "suitability": "/guidance/immigration-rules/immigration-rules-part-suitability"
+
+absent:
+  appendix: ["w", "f", "w worker", "service providers", "w workers", "w partner"]
+  part: []
