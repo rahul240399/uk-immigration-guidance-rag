@@ -1,0 +1,97 @@
+# Retrieval grid: 20 configurations
+# Naming: <chunk>-<embed>-<retr>-<arch>
+
+parameters:
+  bm25_depth: 100
+  dense_depth: 100
+  rrf_k: 60
+  reranker_model: BAAI/bge-reranker-base
+  reranker_top_n: 50
+  final_top_k: 20
+
+configurations:
+  # win64: flat only
+  - name: win64-bge-bm25-flat
+    chunker: win64
+    retrieval: bm25
+    architecture: flat
+  - name: win64-bge-dense-flat
+    chunker: win64
+    retrieval: dense
+    architecture: flat
+  - name: win64-bge-hybrid-flat
+    chunker: win64
+    retrieval: hybrid
+    architecture: flat
+  - name: win64-bge-hybridrr-flat
+    chunker: win64
+    retrieval: hybridrr
+    architecture: flat
+
+  # para: flat and linkexp
+  - name: para-bge-bm25-flat
+    chunker: para
+    retrieval: bm25
+    architecture: flat
+  - name: para-bge-dense-flat
+    chunker: para
+    retrieval: dense
+    architecture: flat
+  - name: para-bge-hybrid-flat
+    chunker: para
+    retrieval: hybrid
+    architecture: flat
+  - name: para-bge-hybridrr-flat
+    chunker: para
+    retrieval: hybridrr
+    architecture: flat
+  - name: para-bge-bm25-linkexp
+    chunker: para
+    retrieval: bm25
+    architecture: linkexp
+  - name: para-bge-dense-linkexp
+    chunker: para
+    retrieval: dense
+    architecture: linkexp
+  - name: para-bge-hybrid-linkexp
+    chunker: para
+    retrieval: hybrid
+    architecture: linkexp
+  - name: para-bge-hybridrr-linkexp
+    chunker: para
+    retrieval: hybridrr
+    architecture: linkexp
+
+  # parentchild: flat and pcreturn
+  - name: parentchild-bge-bm25-flat
+    chunker: parentchild
+    retrieval: bm25
+    architecture: flat
+  - name: parentchild-bge-dense-flat
+    chunker: parentchild
+    retrieval: dense
+    architecture: flat
+  - name: parentchild-bge-hybrid-flat
+    chunker: parentchild
+    retrieval: hybrid
+    architecture: flat
+  - name: parentchild-bge-hybridrr-flat
+    chunker: parentchild
+    retrieval: hybridrr
+    architecture: flat
+  - name: parentchild-bge-bm25-pcreturn
+    chunker: parentchild
+    retrieval: bm25
+    architecture: pcreturn
+  - name: parentchild-bge-dense-pcreturn
+    chunker: parentchild
+    retrieval: dense
+    architecture: pcreturn
+  - name: parentchild-bge-hybrid-pcreturn
+    chunker: parentchild
+    retrieval: hybrid
+    architecture: pcreturn
+  - name: parentchild-bge-hybridrr-pcreturn
+    chunker: parentchild
+    retrieval: hybridrr
+    architecture: pcreturn
