@@ -1,18 +1,47 @@
-generator:
+# config/judge.yaml -- 2026-09-19 (D54, D55, D56; closes F01, F11, F15, F16).
+# Judge model and score mechanics are D50 (pipeline); this file holds what the evaluation-set chat owns:
+# thresholds, rated-set size, rubric levels. Set before the judge run; not edited after it.
+
+judge:
+  provider: ollama
+  model: qwen3.5:9b                       # D50
+  options: {temperature: 0, seed: 20260918, num_ctx: 8192, num_predict: 512}
+  think: false
+
+scores:                                   # two per answer, F16 / D50
+  faithfulness:
+    definition: share of answer statements supported by the returned context (RAGAS; statement extraction then per-statement verdict)
+    judge_output: share in [0, 1]
+    judge_binarised: unsupported_present = (share < 1.0)     # for agreement with the hand label
+  accuracy:
+    definition: agreement with the reference answer
+    levels: [1, 0.5, 0]                   # 1 full and correct; 0.5 partial, incomplete or minor error; 0 wrong, missing or refused
+
+hand_rating:                              # rubric; one row per (question, configuration); student only
+  columns:
+    faithfulness_hand: {levels: [Y, N], question: "Does the answer contain any claim not supported by the returned context?"}
+    accuracy_hand:     {levels: [1, 0.5, 0], same_definition_as: scores.accuracy}
+    copies_or_answers: {levels: [copy, answer], rule: "copy = reproduces the retrieved text without stating the element the question asked for; answer = states it, quotation or not"}   # F11
+  blind: true                             # judge scores and configuration label hidden; rows in random order (seed 20260918)
+  rated_sample_per_config: 50             # F15
+  rated_questions: same_ids_all_configs   # one draw of 50 question_ids, rated under each of the 3 configurations
+  rated_by_tier: {T1: 20, T2: 13, T3: 17} # proportional to 60 / 40 / 50, random within tier, seed 20260918
+  rated_total: 150
+  fallback_per_config: 30                 # 90 total; if used, the shortfall against the ARES floor is a stated limitation
+
+agreement:                                # F01; computed per score, separately
+  accuracy:     {statistic: cohen_kappa, weights: quadratic, levels: [0, 0.5, 1]}
+  faithfulness: {statistic: cohen_kappa, weights: none, levels: [Y, N], judge_side: judge_binarised}
+  threshold: 0.60                         # kappa, each score on its own
+  also_report: [exact_agreement, f1_accuracy_equals_1, confusion_matrix]
+  below_threshold: "that score is reported as unvalidated; RO4 claims for it rest on the 150 hand ratings only; the other score keeps its own result"
+  set_before_run: 2026-09-19
+
+generation:                               # pipeline block (D42, D50 mechanics); added 2026-09-19
   model: gemma4:12b
   digest: 4eb23ef187e2
   options: {temperature: 0, seed: 20260918, num_ctx: 8192, num_predict: 512}
   think: false
-
-judge:
-  model: qwen3.5:9b
-  digest: 6488c96fa5fa
-  options: {temperature: 0, seed: 20260918, num_ctx: 8192, num_predict: 512}
-  think: false
-
-context_units: 5
-budget_tokens: 640
-rated_sample_per_config: 50
-rated_sample_seed: 20260918
-kappa_threshold: null
-f1_threshold: null
+  context_units: 5
+  budget_tokens: 640
+judge_digest: 6488c96fa5fa                # qwen3.5:9b, smoke test 2026-09-19
