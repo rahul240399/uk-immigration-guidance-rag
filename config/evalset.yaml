@@ -1,7 +1,13 @@
+# config/evalset.yaml -- revised 2026-09-19 (D52, D53; closes F21, F22).
+# Supersedes the version at commit 31a7105 (sha256 5f4cb261...). Seed unchanged.
+# Existing keys kept; new keys marked NEW. Sampler behaviour for the new keys: F23.
+
 seed: 20260918
 
 corpus: rules-paragraphs_v1.jsonl
 links: rules-crossrefs_v2.csv
+guidance_corpus: guidance-paragraphs_v1.jsonl          # NEW: source side of T3 guidance_para
+guidance_links: guidance-crossrefs_v2.csv              # NEW
 exclude_text_types: [deleted, list_item, table_row]
 exclude_confidence: [low]
 min_words: 15
@@ -9,14 +15,42 @@ min_words: 15
 tiers:
   T1: one paragraph
   T2: a rule plus its attached subparagraphs, 2 to 6 records, one section
-  T3: a paragraph plus the target of one of its resolved paragraph-level links, target in another section
+  T3: a cross-reference pair; source paragraph plus the paragraph(s) it links to in another section or document; gold = source id plus target id(s); subtype recorded in link_type
 
-counts:
-  skilled_worker: {T1: 8, T2: 7, T3: 5}
-  student:        {T1: 8, T2: 7, T3: 5}
-  graduate:       {T1: 8, T2: 6, T3: 6}
-  visitor:        {T1: 8, T2: 7, T3: 5}
-  family:         {T1: 8, T2: 7, T3: 5}
+link_types:                                            # NEW
+  rules_para:            {table: links,          status: resolved, target_type: paragraph, target_scope: other_section}
+  guidance_para:         {table: guidance_links, status: resolved, target_type: paragraph, exclude_route: [cross-cutting]}
+  rules_section_xcut:    {table: links,          status: resolved, target_type: section,   target_scope: cross_cutting, hand: true}
+  rules_section_other:   {table: links,          status: resolved, target_type: section,   target_scope: any_other,     hand: true}
+
+counts:                                                # synthetic; T3 split by link_type
+  skilled_worker: {T1: 12, T2: 9, T3_rules_para: 2, T3_guidance_para: 4}
+  student:        {T1: 12, T2: 9, T3_rules_para: 0, T3_guidance_para: 3}
+  graduate:       {T1: 12, T2: 4, T3_rules_para: 0, T3_guidance_para: 0}
+  visitor:        {T1: 12, T2: 9, T3_rules_para: 0, T3_guidance_para: 3}
+  family:         {T1: 12, T2: 9, T3_rules_para: 5, T3_guidance_para: 3}
+# synthetic total 120 = T1 60 + T2 40 + T3 20
+
+hand_seeds:                                            # NEW: T3 only; sampler draws source paragraphs, writes no questions
+  counts: {skilled_worker: 10, student: 5, graduate: 5, visitor: 5, family: 5}
+  order: [rules_section_xcut, rules_section_other]     # e1 first, e2 fills
+  overdraw: 2                                          # student skips a seed with a recorded reason
+  output: evalset/<date>_evalset_seeds-hand_v0.csv     # source id, target section, route, link_type
+# hand total 30; question set total 150 = T1 60 / T2 40 / T3 50
+
+topup_only: true                                       # NEW: keep every existing question_id; draw only the per-stratum difference from pool minus drawn seeds
+
+fallback_floor:                                        # NEW: applied at the freeze, not a re-draw; hand items never cut
+  skilled_worker: {T1: 10, T2: 7, T3_synthetic: 4}
+  student:        {T1: 10, T2: 7, T3_synthetic: 1}
+  graduate:       {T1: 8,  T2: 4, T3_synthetic: 0}
+  visitor:        {T1: 10, T2: 7, T3_synthetic: 1}
+  family:         {T1: 10, T2: 7, T3_synthetic: 4}
+# floor total 120 = T1 48 / T2 32 / T3 40 (10 synthetic + 30 hand)
+
+columns: [question_id, route, tier, link_type, question, reference_answer, gold_paragraph_ids,
+          source, generator_model, embedding_model, validated_by_student, notes]   # NEW: link_type added after tier
+source_values: [ragas, prompt-v1, hand]                # NEW
 
 llm:
   provider: ollama

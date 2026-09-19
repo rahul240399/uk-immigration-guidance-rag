@@ -1,0 +1,18 @@
+generator:
+  model: gemma4:12b
+  digest: 4eb23ef187e2
+  options: {temperature: 0, seed: 20260918, num_ctx: 8192, num_predict: 512}
+  think: false
+
+judge:
+  model: qwen3.5:9b
+  digest: 6488c96fa5fa
+  options: {temperature: 0, seed: 20260918, num_ctx: 8192, num_predict: 512}
+  think: false
+
+context_units: 5
+budget_tokens: 640
+rated_sample_per_config: 50
+rated_sample_seed: 20260918
+kappa_threshold: null
+f1_threshold: null
