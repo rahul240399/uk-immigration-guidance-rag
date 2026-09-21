@@ -232,6 +232,9 @@ def main():
     ap.add_argument("--grid", default="config/grid.yaml")
     ap.add_argument("--evalset", required=True)
     ap.add_argument("--only", default=None, help="Run only this config name")
+    ap.add_argument("--label", default=None,
+                    help="Suffix appended to config name for the run folder "
+                         "(e.g. '-dryrun'); omit for no suffix")
     args = ap.parse_args()
 
     paths = load_paths(args.config)
@@ -295,7 +298,7 @@ def main():
         parents = load_parents(idx_dir) if chunker == "parentchild" else None
 
         # Register run
-        run_name = name + "-dryrun"
+        run_name = name + (args.label if args.label else "")
         ctx = start_run("grid", run_name, {
             "evalset_sha256": _sha256_file(evalset_path),
             "grid_sha256": _sha256_file(Path(args.grid)),
