@@ -267,6 +267,24 @@ class TestVerify:
 
         assert verify(tmp_path, Path("dummy.csv")) is True
 
+    def test_verify_skips_not_found_case(self, tmp_path):
+        """Not-found cases are skipped (faithfulness set by rule, not compute)."""
+        judgements = [
+            {"question_id": "Q0001",
+             "statements": [], "verdicts": [],
+             "faithfulness": 0.0,
+             "not_found_case": True, "flag": None},
+            {"question_id": "Q0002",
+             "statements": ["a"], "verdicts": ["supported"],
+             "faithfulness": 1.0, "flag": None},
+        ]
+        jpath = tmp_path / "judgements.jsonl"
+        with jpath.open("w") as f:
+            for j in judgements:
+                f.write(json.dumps(j) + "\n")
+
+        assert verify(tmp_path, Path("dummy.csv")) is True
+
     def test_verify_missing_file(self, tmp_path):
         """Verify returns False if judgements.jsonl missing."""
         assert verify(tmp_path, Path("dummy.csv")) is False

@@ -35,8 +35,21 @@ from code.common.run_registry import load_paths, start_run
 # ── pure metric functions (testable) ─────────────────────────────────
 
 def _to_str_labels(values: list) -> list[str]:
-    """Convert numeric accuracy levels to strings for sklearn compatibility."""
-    return [str(v) for v in values]
+    """Convert numeric accuracy levels to strings for sklearn compatibility.
+
+    Snaps floats to nearest level in {0, 0.5, 1} first so that e.g. 0.0
+    and 0 both become '0', and 1.0 and 1 both become '1'.
+    """
+    ACC_LEVELS = [0, 0.5, 1]
+    result = []
+    for v in values:
+        if isinstance(v, (int, float)):
+            # Snap to nearest canonical level
+            snapped = min(ACC_LEVELS, key=lambda lv: abs(lv - v))
+            result.append(str(snapped))
+        else:
+            result.append(str(v))
+    return result
 
 
 def quadratic_kappa(y_hand: list, y_judge: list,
@@ -111,14 +124,18 @@ def compute_agreement(
     acc_hand = []
     acc_judge = []
     acc_null = 0
+    ACC_SNAP = {0: 0, 0.0: 0, 0.5: 0.5, 1: 1, 1.0: 1}
     for p in pairs:
         h = p["accuracy_hand"]
         j = p["accuracy_judge"]
         if j is None:
             acc_null += 1
             continue
-        acc_hand.append(h)
-        acc_judge.append(j)
+        # Snap both to canonical levels
+        h_snapped = ACC_SNAP.get(h, h)
+        j_snapped = ACC_SNAP.get(j, j)
+        acc_hand.append(h_snapped)
+        acc_judge.append(j_snapped)
 
     acc_result = {"n": len(acc_hand), "null_excluded": acc_null}
     if len(acc_hand) >= 2:
@@ -174,6 +191,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--key", required=True, help="Key file CSV")
     ap.add_argument("--judgements", nargs="+", required=True,
                     help="Judge run folders")
+    ap.add_argument("--subset", nargs="*", default=None,
+                    help="Files listing sheet_rows for subset reports "
+                         "(one sheet_row per line)")
     args = ap.parse_args(argv)
 
     paths = load_paths(args.config)
@@ -200,6 +220,10 @@ def main(argv: list[str] | None = None) -> int:
             with open(cp) as f:
                 config_name = json.load(f).get("config_name", "")
         jp = jpath / "judgements.jsonl"
+        if not jp.exists():
+            # Try arch-prefixed name (e.g. flat-judgements.jsonl)
+            candidates = list(jpath.glob("*judgements.jsonl"))
+            jp = candidates[0] if candidates else jp
         if jp.exists():
             with open(jp, encoding="utf-8") as f:
                 for line in f:
@@ -226,13 +250,21 @@ def main(argv: list[str] | None = None) -> int:
         if not acc_hand_str or not faith_hand:
             continue
 
-        acc_hand = float(acc_hand_str)
+        # Map hand accuracy to canonical float levels
+        # Handles: '0', '0.0', '0.5', '5', '1', '1.0'
+        ACC_MAP = {"0": 0, "0.0": 0, "0.5": 0.5, "5": 0.5,
+                   "1": 1, "1.0": 1}
+        if acc_hand_str in ACC_MAP:
+            acc_hand = ACC_MAP[acc_hand_str]
+        else:
+            acc_hand = float(acc_hand_str)
         acc_judge = j.get("accuracy")
         faith_judge = j.get("faithfulness")
 
         pair = {
             "question_id": qid,
             "config": config,
+            "_sheet_row": sr,
             "accuracy_hand": acc_hand,
             "accuracy_judge": acc_judge,
             "faithfulness_hand": faith_hand,
@@ -248,6 +280,22 @@ def main(argv: list[str] | None = None) -> int:
         results["per_config"][config] = compute_agreement(pairs, threshold)
 
     results["pooled"] = compute_agreement(all_pairs, threshold)
+
+    # ── subset reports ───────────────────────────────────────────────
+    if args.subset:
+        results["subsets"] = {}
+        for subset_file in args.subset:
+            sf = Path(subset_file)
+            subset_name = sf.stem
+            with sf.open() as f:
+                subset_rows = {int(line.strip()) for line in f
+                               if line.strip().isdigit()}
+            subset_pairs = [p for p in all_pairs
+                            if p.get("_sheet_row") in subset_rows]
+            if subset_pairs:
+                results["subsets"][subset_name] = compute_agreement(
+                    subset_pairs, threshold)
+                results["subsets"][subset_name]["n_rows"] = len(subset_rows)
 
     # ── register run and write output ────────────────────────────────
     ctx = start_run("agreement", "agreement-v1", {
@@ -285,6 +333,13 @@ def main(argv: list[str] | None = None) -> int:
         ff = r["faithfulness"]
         print(f"  {config}: acc_kappa={a.get('kappa')} "
               f"faith_kappa={ff.get('kappa')}")
+    if "subsets" in results:
+        for sname, sr in sorted(results["subsets"].items()):
+            sa = sr["accuracy"]
+            sf = sr["faithfulness"]
+            print(f"  subset {sname}: n={sr.get('n_rows','')} "
+                  f"acc_kappa={sa.get('kappa')} "
+                  f"faith_kappa={sf.get('kappa')}")
     print(f"output: {out_path}")
 
     return 0
