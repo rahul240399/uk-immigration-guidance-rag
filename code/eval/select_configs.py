@@ -21,7 +21,7 @@ def select(summary_path: str) -> dict:
     # Classify architecture from config name
     arch_map = {}
     for r in rows:
-        name = r["config_name"]
+        name = r.get("config_name") or r.get("config", "")
         if "linkexp" in name:
             arch_map[name] = "linkexp"
         elif "pcreturn" in name:
@@ -31,7 +31,8 @@ def select(summary_path: str) -> dict:
 
     best = {}
     for name, arch in arch_map.items():
-        r = next(row for row in rows if row["config_name"] == name)
+        r = next(row for row in rows
+                 if (row.get("config_name") or row.get("config", "")) == name)
         budget = float(r["budget_640_mean"])
         recall = float(r["recall_10_mean"])
         key = (-budget, -recall, name)

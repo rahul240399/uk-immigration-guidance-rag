@@ -103,7 +103,9 @@ def build_sheet_and_key(
                 continue
 
             # Context = the passages as given to the generator
-            context = "\n\n".join(
+            # Prefer context_text (full passages) if stored in answers.jsonl;
+            # fall back to labels joined (for backward compat)
+            context = ans.get("context_text") or "\n\n".join(
                 f"{label}" for label in ans.get("labels", [])
             )
 

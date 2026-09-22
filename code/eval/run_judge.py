@@ -230,6 +230,9 @@ def verify(judge_folder: Path, evalset_path: Path) -> bool:
     """
     jpath = judge_folder / "judgements.jsonl"
     if not jpath.exists():
+        candidates = list(judge_folder.glob("*judgements.jsonl"))
+        jpath = candidates[0] if candidates else jpath
+    if not jpath.exists():
         log.error("judgements.jsonl not found in %s", judge_folder)
         return False
 

@@ -253,74 +253,151 @@ def main():
             log.error("No run folder for %s", config_name)
             continue
 
+        # ── Resume: skip config if a complete generate run already exists ─
+        existing_gen = None
+        for d in sorted(runs_dir.iterdir()):
+            if not d.is_dir() or "generate" not in d.name:
+                continue
+            cp = d / "config.json"
+            ap = d / "answers.jsonl"
+            rp = d / "result.json"
+            if cp.exists() and ap.exists() and rp.exists():
+                gc = json.loads(cp.read_text())
+                if gc.get("config_name") == config_name:
+                    n_answers = sum(1 for _ in ap.open())
+                    status = json.loads(rp.read_text()).get("status", "")
+                    if status == "ok" and n_answers == len(questions):
+                        existing_gen = d
+        if existing_gen:
+            log.info("SKIP %s: complete run at %s (%d answers)",
+                     config_name, existing_gen.name, len(questions))
+            print(f"  {config_name}: SKIP (complete run exists at {existing_gen.name})")
+            continue
+
+        # ── Resume: find an incomplete run for this config to continue ──
+        resume_dir = None
+        resume_done: set[str] = set()
+        for d in sorted(runs_dir.iterdir()):
+            if not d.is_dir() or "generate" not in d.name:
+                continue
+            cp = d / "config.json"
+            ap = d / "answers.jsonl"
+            rp = d / "result.json"
+            if cp.exists() and ap.exists():
+                gc = json.loads(cp.read_text())
+                if gc.get("config_name") == config_name:
+                    has_result = rp.exists() and json.loads(rp.read_text()).get("status") == "ok"
+                    if not has_result:
+                        # Incomplete run — count existing answers
+                        existing = []
+                        with ap.open(encoding="utf-8") as f:
+                            for line in f:
+                                line = line.strip()
+                                if line:
+                                    existing.append(json.loads(line))
+                        if existing:
+                            resume_dir = d
+                            resume_done = {a["question_id"] for a in existing}
+
         ret_path = run_dir / "retrieved.jsonl"
         with open(ret_path, encoding="utf-8") as f:
             retrievals = {json.loads(l)["question_id"]: json.loads(l) for l in f}
 
-        ctx = start_run("generate", config_name, {
-            "evalset_sha256": _sha256_file(Path(args.evalset)),
-            "selected_sha256": _sha256_file(Path(args.selected)),
-            "prompt_sha256": prompt_sha,
-            "model": model,
-            "digest": actual_digest[:16],
-            "context_units": context_units,
-            "budget_tokens": budget_tokens,
-        }, paths)
-
-        answers = []
-        for qi, q in enumerate(questions, 1):
-            qid = q["question_id"]
-            ret = retrievals.get(qid, {})
-            units_ret = ret.get("retrieved", [])[:context_units]
-
-            context, labels, context_tokens, n_units, n_appended = \
-                build_context(units_ret, arch, units_by_id, corpus_records, tok)
-
-            prompt = prompt_template.replace("{passages}", context).replace(
-                "{question}", q["question"])
-
-            t0 = time.time()
-            resp = _call_ollama(prompt, model, options, think)
-            latency = time.time() - t0
-
-            answer_text = resp.get("response", "") if resp else ""
-
-            # Extract cited labels
-            cited = re.findall(r'\[([^\]]+)\]', answer_text)
-
-            answers.append({
-                "question_id": qid,
-                "n_units": n_units,
-                "n_appended": n_appended,
-                "context_tokens": context_tokens,
-                "labels": labels,
-                "cited_labels": cited,
-                "answer": answer_text,
+        if resume_dir and resume_done:
+            # Continue in the existing run folder
+            ctx_run_dir = resume_dir
+            log.info("RESUME %s: %d already done in %s",
+                     config_name, len(resume_done), resume_dir.name)
+            out_path = ctx_run_dir / "answers.jsonl"
+            # We'll append to it
+        else:
+            ctx = start_run("generate", config_name, {
+                "evalset_sha256": _sha256_file(Path(args.evalset)),
+                "selected_sha256": _sha256_file(Path(args.selected)),
                 "prompt_sha256": prompt_sha,
                 "model": model,
                 "digest": actual_digest[:16],
-                "latency_s": round(latency, 2),
-            })
+                "context_units": context_units,
+                "budget_tokens": budget_tokens,
+            }, paths)
+            ctx_run_dir = ctx.run_dir
+            out_path = ctx_run_dir / "answers.jsonl"
 
-            if qi % 5 == 0:
-                log.info("  %s: %d/%d", config_name, qi, len(questions))
+        answers_all = []
+        # Read back existing answers for summary stats
+        if resume_done and (ctx_run_dir / "answers.jsonl").exists():
+            with (ctx_run_dir / "answers.jsonl").open(encoding="utf-8") as f:
+                for line in f:
+                    if line.strip():
+                        answers_all.append(json.loads(line))
 
-        out_path = ctx.run_dir / "answers.jsonl"
-        with open(out_path, "w", encoding="utf-8") as f:
-            for a in answers:
-                f.write(json.dumps(a, ensure_ascii=False) + "\n")
+        # Open for append (streaming writes)
+        with out_path.open("a", encoding="utf-8") as out_fh:
+            for qi, q in enumerate(questions, 1):
+                qid = q["question_id"]
 
-        not_found = sum(1 for a in answers if "Not found" in a["answer"])
-        mean_tokens = sum(a["context_tokens"] for a in answers) / len(answers) if answers else 0
-        mean_latency = sum(a["latency_s"] for a in answers) / len(answers) if answers else 0
-        total_appended = sum(a["n_appended"] for a in answers)
+                # Skip already-done questions
+                if qid in resume_done:
+                    continue
 
-        ctx.log(f"answers={len(answers)} not_found={not_found} "
-                f"total_appended={total_appended}")
-        ctx.finish("ok", f"{config_name}: {len(answers)} answers, "
-                   f"{not_found} not-found, {total_appended} appended")
+                ret = retrievals.get(qid, {})
+                units_ret = ret.get("retrieved", [])[:context_units]
 
-        print(f"  {config_name}: {len(answers)} answers, {not_found} not-found, "
+                context, labels, context_tokens, n_units, n_appended = \
+                    build_context(units_ret, arch, units_by_id, corpus_records, tok)
+
+                prompt = prompt_template.replace("{passages}", context).replace(
+                    "{question}", q["question"])
+
+                t0 = time.time()
+                resp = _call_ollama(prompt, model, options, think)
+                latency = time.time() - t0
+
+                answer_text = resp.get("response", "") if resp else ""
+
+                # Extract cited labels
+                cited = re.findall(r'\[([^\]]+)\]', answer_text)
+
+                answer_record = {
+                    "question_id": qid,
+                    "n_units": n_units,
+                    "n_appended": n_appended,
+                    "context_tokens": context_tokens,
+                    "labels": labels,
+                    "cited_labels": cited,
+                    "answer": answer_text,
+                    "prompt_sha256": prompt_sha,
+                    "model": model,
+                    "digest": actual_digest[:16],
+                    "latency_s": round(latency, 2),
+                }
+
+                # Write immediately (streaming)
+                out_fh.write(json.dumps(answer_record, ensure_ascii=False) + "\n")
+                out_fh.flush()
+                answers_all.append(answer_record)
+
+                if qi % 5 == 0 or qi == len(questions):
+                    log.info("  %s: %d/%d", config_name, qi, len(questions))
+
+        # ── finalize ─────────────────────────────────────────────────
+        not_found = sum(1 for a in answers_all if "Not found" in a["answer"])
+        mean_tokens = sum(a["context_tokens"] for a in answers_all) / len(answers_all) if answers_all else 0
+        mean_latency = sum(a["latency_s"] for a in answers_all) / len(answers_all) if answers_all else 0
+        total_appended = sum(a["n_appended"] for a in answers_all)
+
+        # Write result.json to mark complete
+        result_data = {
+            "end_time": time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()),
+            "status": "ok",
+            "headline": f"{config_name}: {len(answers_all)} answers, "
+                        f"{not_found} not-found, {total_appended} appended",
+            "metrics": None,
+        }
+        (ctx_run_dir / "result.json").write_text(
+            json.dumps(result_data, indent=2), encoding="utf-8")
+
+        print(f"  {config_name}: {len(answers_all)} answers, {not_found} not-found, "
               f"mean_tokens={mean_tokens:.0f}, mean_latency={mean_latency:.1f}s, "
               f"total_appended={total_appended}")
 
