@@ -246,6 +246,11 @@ def verify(judge_folder: Path, evalset_path: Path) -> bool:
         if stmts is None or vdcts is None:
             continue
 
+        # Not-found cases: faithfulness was set by the not-found rule,
+        # not by compute_faithfulness; skip recomputation
+        if j.get("not_found_case"):
+            continue
+
         recomputed = compute_faithfulness(stmts, vdcts)
         if stored is not None and abs(recomputed - stored) > 1e-6:
             log.error("  %s: stored=%.6f recomputed=%.6f",
